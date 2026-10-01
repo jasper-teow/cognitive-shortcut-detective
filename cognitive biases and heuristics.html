@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#273449">
+  <meta name="description" content="An offline-first student learning tool based on The Cognitive Bias Codex.">
+  <title>Cognitive Shortcut Detective</title>
+  <style>
+    :root {
+      --ink: #273449;
+      --muted: #667085;
+      --soft: #f5f7fa;
+      --line: #dbe2ea;
+      --card: #ffffff;
+      --teal: #009b8e;
+      --teal-soft: #e8f7f5;
+      --blue: #1480aa;
+      --blue-soft: #eaf6fb;
+      --green: #4e9c1f;
+      --green-soft: #eef8e8;
+      --grey: #737373;
+      --grey-soft: #f0f1f2;
+      --warning: #8a5a00;
+      --warning-soft: #fff7e4;
+      --danger: #a13b3b;
+      --danger-soft: #fff0f0;
+      --shadow: 0 12px 32px rgba(39, 52, 73, .08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(0, 155, 142, .08), transparent 28rem),
+        radial-gradient(circle at 95% 5%, rgba(20, 128, 170, .08), transparent 28rem),
+        #f7f9fb;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: #126a8d; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(0, 155, 142, .35);
+      outline-offset: 3px;
+    }
+    .page-header {
+      color: #fff;
+      background: linear-gradient(135deg, #273449 0%, #314b64 55%, #1d7c82 130%);
+      padding: 3rem 1.2rem 2.4rem;
+    }
+    .header-inner, .container { max-width: 1180px; margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 .55rem;
+      color: #bcece7;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, h4 { line-height: 1.18; }
+    h1 { max-width: 780px; margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.04em; }
+    .dek { max-width: 760px; margin: 1rem 0 0; color: #dce9f0; font-size: 1.08rem; }
+    .header-meta { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.25rem; }
+    .header-pill {
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      padding: .35rem .7rem;
+      color: #effcfb;
+      background: rgba(255,255,255,.08);
+      font-size: .82rem;
+    }
+    .container { padding: 1.2rem; }
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(250px, .8fr);
+      gap: 1rem;
+      margin-top: 1.3rem;
+    }
+    .card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .card-pad { padding: 1.35rem; }
+    .intro h2, .section-title { margin: 0 0 .55rem; font-size: 1.35rem; }
+    .intro p { margin: .4rem 0; }
+    .note {
+      border-left: 4px solid var(--teal);
+      border-radius: 12px;
+      padding: .95rem 1rem;
+      background: var(--teal-soft);
+      color: #235d5a;
+    }
+    .how-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+    .how-list li { display: flex; gap: .65rem; align-items: flex-start; }
+    .step-num {
+      flex: 0 0 1.55rem;
+      display: grid;
+      place-items: center;
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--ink);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+      gap: 1rem;
+      align-items: start;
+      margin-top: 1rem;
+    }
+    .panel-title-row { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+    .panel-title-row h2 { margin: 0; font-size: 1.32rem; }
+    .small { color: var(--muted); font-size: .9rem; }
+    label { display: block; margin: 1rem 0 .4rem; font-weight: 750; }
+    textarea, input[type="text"], select {
+      width: 100%;
+      border: 1px solid #bdc8d5;
+      border-radius: 12px;
+      padding: .8rem .9rem;
+      color: var(--ink);
+      background: #fff;
+    }
+    textarea { min-height: 195px; resize: vertical; }
+    textarea::placeholder, input::placeholder { color: #8895a4; }
+    .button-row { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .85rem; }
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: .7rem .95rem;
+      color: var(--ink);
+      background: #edf1f5;
+      font-weight: 750;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(39,52,73,.1); }
+    .btn-primary { color: #fff; background: var(--ink); }
+    .btn-teal { color: #fff; background: var(--teal); }
+    .btn-outline { border-color: #b8c7d5; background: #fff; }
+    .btn-danger { color: var(--danger); border-color: #e2baba; background: #fff; }
+    .btn-link { padding: .2rem 0; color: #176c88; background: transparent; font-weight: 750; }
+    .example-row { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .8rem; }
+    .example-chip {
+      border: 1px solid #cbd8e3;
+      border-radius: 999px;
+      padding: .38rem .65rem;
+      color: #36546b;
+      background: #f7fbfd;
+      font-size: .82rem;
+      text-align: left;
+    }
+    .example-chip:hover { border-color: var(--teal); background: var(--teal-soft); }
+    .status {
+      min-height: 1.5rem;
+      margin-top: .8rem;
+      border-radius: 10px;
+      padding: .6rem .75rem;
+      font-size: .9rem;
+    }
+    .status:empty { display: none; }
+    .status-info { color: #2d5b70; background: var(--blue-soft); }
+    .status-success { color: #2f6d2b; background: var(--green-soft); }
+    .status-warning { color: var(--warning); background: var(--warning-soft); }
+    .status-error { color: var(--danger); background: var(--danger-soft); }
+    .guide-panel { position: sticky; top: 1rem; }
+    .guide-panel .card-pad { padding-bottom: 1rem; }
+    .guide-intro { margin: .45rem 0 1rem; color: var(--muted); font-size: .92rem; }
+    .question-card {
+      margin: .75rem 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: .85rem;
+      background: #fbfcfd;
+    }
+    .question-card p { margin: 0 0 .7rem; font-weight: 700; }
+    .answer-row { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .answer-btn {
+      border: 1px solid #c2cfdb;
+      border-radius: 8px;
+      padding: .4rem .55rem;
+      color: #36546b;
+      background: #fff;
+      font-size: .84rem;
+    }
+    .answer-btn.selected { border-color: var(--teal); color: #12645e; background: var(--teal-soft); }
+    .explain-box { display: flex; gap: .45rem; margin-top: .6rem; }
+    .explain-box input { min-width: 0; padding: .55rem .65rem; }
+    .section { margin-top: 1.2rem; }
+    .section-header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem; align-items: end; margin-bottom: .8rem; }
+    .section-header h2 { margin: 0; font-size: 1.55rem; }
+    .section-header p { margin: .35rem 0 0; color: var(--muted); }
+    .results-list { display: grid; gap: 1rem; }
+    .match-card { overflow: hidden; }
+    .match-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1.15rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #fff, #fbfdfe);
+    }
+    .match-kicker { margin: 0 0 .25rem; color: var(--muted); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .match-top h3 { margin: 0; font-size: 1.4rem; }
+    .confidence {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: .38rem .65rem;
+      font-size: .78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .confidence-strong { color: #236622; background: var(--green-soft); }
+    .confidence-plausible { color: #275d78; background: var(--blue-soft); }
+    .confidence-weak { color: #765b18; background: var(--warning-soft); }
+    .match-body { padding: 1.2rem 1.25rem 1.3rem; }
+    .path {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      align-items: center;
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+    .path span { border-radius: 999px; padding: .22rem .5rem; color: #fff; background: var(--ink); font-weight: 700; }
+    .path .path-arrow { padding: 0; color: #8b98a6; background: transparent; }
+    .tone-info { background: var(--teal) !important; }
+    .tone-meaning { background: var(--blue) !important; }
+    .tone-act { background: var(--green) !important; }
+    .tone-memory { background: var(--grey) !important; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+    .detail-block { min-width: 0; border-top: 1px solid #e6ebf0; padding-top: .75rem; }
+    .detail-block h4 { margin: 0 0 .35rem; font-size: .96rem; }
+    .detail-block p { margin: 0; color: #465568; }
+    .detail-block ul { margin: 0; padding-left: 1.15rem; color: #465568; }
+    .detail-block li + li { margin-top: .3rem; }
+    .full-width { grid-column: 1 / -1; }
+    .evidence-list { margin: 0; padding-left: 1.15rem; }
+    .related-list { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .related-btn { border: 1px solid #c8d7e2; border-radius: 999px; padding: .35rem .55rem; color: #176c88; background: #fff; font-size: .82rem; }
+    .reflection-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .8rem; }
+    .reflection-grid label { margin: 0; }
+    .reflection-grid textarea { min-height: 112px; margin-top: .35rem; }
+    .empty-state {
+      border: 1px dashed #b9c7d3;
+      border-radius: 16px;
+      padding: 1.25rem;
+      color: #536273;
+      background: #fbfcfd;
+    }
+    .empty-state h3 { margin: 0 0 .4rem; color: var(--ink); }
+    .explorer-controls { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: .7rem; margin-bottom: .8rem; }
+    .count { color: var(--muted); font-size: .88rem; }
+    .category-group { overflow: hidden; margin: .75rem 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .category-group > summary { padding: .8rem 1rem; font-weight: 800; cursor: pointer; list-style-position: inside; }
+    .category-group > summary::marker { color: var(--teal); }
+    .category-group.tone-group-info > summary { color: #06786f; background: var(--teal-soft); }
+    .category-group.tone-group-meaning > summary { color: #126486; background: var(--blue-soft); }
+    .category-group.tone-group-act > summary { color: #3b7918; background: var(--green-soft); }
+    .category-group.tone-group-memory > summary { color: #5f5f5f; background: var(--grey-soft); }
+    .subcategory-group { margin: .55rem .7rem; border: 1px solid #e4e9ee; border-radius: 11px; }
+    .subcategory-group > summary { padding: .6rem .7rem; color: #455467; cursor: pointer; font-weight: 700; }
+    .entry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; padding: .2rem .7rem .75rem; }
+    .entry-button {
+      display: block;
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: .45rem .5rem;
+      color: #176c88;
+      background: #f8fafb;
+      text-align: left;
+      font-size: .86rem;
+    }
+    .entry-button:hover { border-color: #b8d4df; background: #eef8fa; }
+    .entry-detail { margin-top: .9rem; }
+    .entry-detail .match-body { padding-top: 1rem; }
+    .hidden { display: none !important; }
+    .muted-box { border-radius: 12px; padding: .8rem .9rem; color: #566577; background: #f7f9fb; }
+    footer {
+      max-width: 1180px;
+      margin: 1.5rem auto 0;
+      padding: 1.6rem 1.2rem 2.5rem;
+      color: #647184;
+      font-size: .83rem;
+    }
+    footer p { max-width: 900px; margin: .35rem 0; }
+    footer a { color: #4d7288; }
+    .noscript {
+      margin: 1rem;
+      border: 1px solid #e5b6b6;
+      border-radius: 12px;
+      padding: 1rem;
+      color: var(--danger);
+      background: var(--danger-soft);
+    }
+    @media (max-width: 850px) {
+      .intro, .workspace { grid-template-columns: 1fr; }
+      .guide-panel { position: static; }
+    }
+    @media (max-width: 600px) {
+      .page-header { padding: 2.2rem 1rem 1.8rem; }
+      .container { padding: .8rem; }
+      .card-pad { padding: 1rem; }
+      .detail-grid, .reflection-grid, .explorer-controls { grid-template-columns: 1fr; }
+      .entry-list { grid-template-columns: 1fr; }
+      .match-top { flex-direction: column; }
+      .btn { width: 100%; }
+      .button-row .btn-link { width: auto; }
+      .explain-box { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <noscript><div class="noscript">This learning tool needs JavaScript enabled. The codex remains available through the original source links in the footer.</div></noscript>
+
+  <header class="page-header">
+    <div class="header-inner">
+      <p class="eyebrow">Consumer Psychology • Reflection Tool</p>
+      <h1>Cognitive Shortcut Detective</h1>
+      <p class="dek">Describe a moment when your judgment, decision, memory, or interpretation may have been shaped by a quick mental shortcut. Explore possible matches from The Cognitive Bias Codex.</p>
+      <div class="header-meta" aria-label="Application features">
+        <span class="header-pill">Offline-first</span>
+        <span class="header-pill">188 codex entries</span>
+        <span class="header-pill">No account or API key</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="intro" aria-labelledby="about-title">
+      <article class="card card-pad">
+        <h2 id="about-title">What is a cognitive shortcut?</h2>
+        <p>A cognitive shortcut is a quick way of judging, remembering, deciding, or interpreting information. Shortcuts can be useful and efficient, but they can also create predictable blind spots.</p>
+        <p>A single situation may involve more than one codex entry. This tool offers possible matches for reflection; it does not diagnose you or claim certainty.</p>
+        <div class="note"><strong>Important distinction:</strong> The codex includes heuristics, biases, effects, fallacies, memory phenomena, and related cognitive patterns. “Cognitive shortcut” is the broad, student-friendly term used here.</div>
+      </article>
+      <article class="card card-pad">
+        <h2>How to use it</h2>
+        <ol class="how-list">
+          <li><span class="step-num">1</span><span>Describe a concrete moment rather than naming a bias.</span></li>
+          <li><span class="step-num">2</span><span>Analyse the description to see up to three possible codex matches.</span></li>
+          <li><span class="step-num">3</span><span>If the description is vague, use the neutral follow-up questions.</span></li>
+          <li><span class="step-num">4</span><span>Use the reflection prompts to slow down your own reasoning.</span></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="workspace" id="detective" aria-labelledby="describe-title">
+      <article class="card card-pad">
+        <div class="panel-title-row">
+          <div>
+            <h2 id="describe-title">Describe your situation</h2>
+            <p class="small">Concrete details help the local matching system distinguish similar entries.</p>
+          </div>
+        </div>
+        <label for="situationInput">What happened?</label>
+        <textarea id="situationInput" placeholder="For example: The first price I saw made a later price seem reasonable, even though I had not checked whether it was a fair price."></textarea>
+        <p class="small">You can describe consumer choices, social judgments, classroom or work decisions, financial choices, memories, predictions, arguments, or group behaviour.</p>
+        <div class="example-row" aria-label="Example situations">
+          <button type="button" class="example-chip" data-example="The first price I saw made a later price seem reasonable.">First price influenced me</button>
+          <button type="button" class="example-chip" data-example="I kept supporting a project because I had already spent so much time and money on it.">Kept going after investing</button>
+          <button type="button" class="example-chip" data-example="After learning about a particular brand, I started noticing it everywhere.">Started noticing a brand everywhere</button>
+          <button type="button" class="example-chip" data-example="I chose the familiar brand even though I had little evidence that it was better.">Chose the familiar option</button>
+          <button type="button" class="example-chip" data-example="I remembered a long holiday mainly by its best moment and its worst moment.">Remembered the peak and end</button>
+          <button type="button" class="example-chip" data-example="I believed the product was good because a famous expert recommended it.">Trusted a famous expert</button>
+        </div>
+        <div class="button-row">
+          <button type="button" class="btn btn-primary" id="analyseBtn">Analyse my situation</button>
+          <button type="button" class="btn btn-teal" id="unpackBtn">Help me unpack it</button>
+          <button type="button" class="btn btn-outline" id="randomBtn">Use a random example</button>
+          <button type="button" class="btn btn-danger" id="clearBtn">Clear</button>
+        </div>
+        <div id="inputStatus" class="status" role="status" aria-live="polite"></div>
+      </article>
+
+      <aside class="card guide-panel" id="guidePanel" aria-labelledby="guide-title">
+        <div class="card-pad">
+          <div class="panel-title-row">
+            <div>
+              <h2 id="guide-title">Unpack the situation</h2>
+              <p class="guide-intro">These questions focus on what happened, not on guessing a bias by name. Answer only what feels relevant.</p>
+            </div>
+          </div>
+          <div id="guideQuestions"></div>
+          <div id="guideStatus" class="status" role="status" aria-live="polite"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section hidden" id="resultsSection" aria-labelledby="resultsTitle" aria-live="polite">
+      <div class="section-header">
+        <div>
+          <h2 id="resultsTitle">Possible codex matches</h2>
+          <p id="resultsIntro">These are possible matches for reflection, not a diagnosis.</p>
+        </div>
+        <button type="button" class="btn btn-outline" id="browseFromResultsBtn">Browse all 188 entries</button>
+      </div>
+      <div id="resultsList" class="results-list"></div>
+    </section>
+
+    <section class="section hidden" id="reflectionSection" aria-labelledby="reflectionTitle">
+      <div class="card card-pad">
+        <div class="section-header">
+          <div>
+            <h2 id="reflectionTitle">Slow down and reflect</h2>
+            <p>Your answers stay in this browser. Nothing is sent or stored by this page.</p>
+          </div>
+        </div>
+        <div class="reflection-grid">
+          <label>What was the cue or trigger?
+            <textarea data-reflection="cue" placeholder="What stood out, arrived first, or felt most compelling?"></textarea>
+          </label>
+          <label>What judgment did the shortcut replace?
+            <textarea data-reflection="judgment" placeholder="What would you otherwise have had to compare, verify, or think through?"></textarea>
+          </label>
+          <label>What information may have been ignored?
+            <textarea data-reflection="ignored" placeholder="What evidence, alternative, or longer-term consequence was missing?"></textarea>
+          </label>
+          <label>What would a slower process look like?
+            <textarea data-reflection="slower" placeholder="What would you check, compare, ask, or postpone?"></textarea>
+          </label>
+          <label class="full-width">Did the shortcut help, hurt, or do both?
+            <textarea data-reflection="impact" placeholder="Explain the trade-off."></textarea>
+          </label>
+        </div>
+        <div class="button-row">
+          <button type="button" class="btn btn-teal" id="copyReflectionBtn">Copy reflection</button>
+          <button type="button" class="btn btn-outline" id="copyResultBtn">Copy result</button>
+          <button type="button" class="btn btn-outline" id="startAgainBtn">Start again</button>
+        </div>
+        <div id="reflectionStatus" class="status" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="explorerSection" aria-labelledby="explorerTitle">
+      <div class="card card-pad">
+        <div class="section-header">
+          <div>
+            <h2 id="explorerTitle">Browse the codex</h2>
+            <p>Search the exact English entries and explore their category path.</p>
+          </div>
+        </div>
+        <div class="explorer-controls">
+          <label class="hidden" for="codexSearch">Search the codex</label>
+          <input id="codexSearch" type="text" placeholder="Search entries, categories, subcategories, or cues">
+          <label class="hidden" for="categoryFilter">Filter by category</label>
+          <select id="categoryFilter" aria-label="Filter by broad category">
+            <option value="">All broad categories</option>
+          </select>
+        </div>
+        <div id="explorerCount" class="count" role="status" aria-live="polite"></div>
+        <div id="explorerList"></div>
+        <div id="entryDetail" class="entry-detail hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Attribution:</strong> Adapted from The Cognitive Bias Codex by John Manoogian III, with category model and descriptions by Buster Benson and implementation by TilmannR. Source: Wikimedia Commons. Licensed under CC BY-SA 4.0. This application adds original educational explanations and examples.</p>
+    <p>
+      <a href="https://upload.wikimedia.org/wikipedia/commons/6/65/Cognitive_bias_codex_en.svg" target="_blank" rel="noopener noreferrer">Original SVG</a>
+      · <a href="https://commons.wikimedia.org/wiki/File:Cognitive_bias_codex_en.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons file page</a>
+      · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 licence</a>
+    </p>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var SOURCE_ENTRIES = [{"name":"Availability heuristic","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Availability_heuristic"},{"name":"Attentional bias","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Attentional_bias"},{"name":"Illusory truth effect","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Illusory_truth_effect"},{"name":"Mere–exposure effect","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Mere-exposure_effect"},{"name":"Context effect","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Context_effect"},{"name":"Cue–dependent forgetting","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Cue-dependent_forgetting"},{"name":"Mood–congruent memory bias","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Mood_congruence"},{"name":"Frequency illusion","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Frequency_illusion"},{"name":"Baader–Meinhof Phenomenon","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Frequency_illusion"},{"name":"Empathy gap","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Empathy_gap"},{"name":"Omission bias","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Omission_bias"},{"name":"Base rate fallacy","category":"Too Much Information","subcategory":"We notice things already primed in memory or repeated often","sourceUrl":"https://en.wikipedia.org/wiki/Base_rate_fallacy"},{"name":"Bizarreness effect","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/Bizarreness_effect"},{"name":"Humor effect","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/List_of_cognitive_biases#Humor_effect"},{"name":"Von Restorff effect","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/Von_Restorff_effect"},{"name":"Picture superiority effect","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/Picture_superiority_effect"},{"name":"Self–relevance effect","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/Self-reference_effect"},{"name":"Negativity bias","category":"Too Much Information","subcategory":"Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things","sourceUrl":"https://en.wikipedia.org/wiki/Negativity_bias"},{"name":"Anchoring","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Anchoring_(cognitive_bias)"},{"name":"Conservatism","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Conservatism_(belief_revision)"},{"name":"Contrast effect","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Contrast_effect"},{"name":"Distinction bias","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Distinction_bias"},{"name":"Focusing effect","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Anchoring_(cognitive_bias)"},{"name":"Framing effect","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Framing_effect_(psychology)"},{"name":"Money illusion","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Money_illusion"},{"name":"Weber–Fechner law","category":"Too Much Information","subcategory":"We notice when something has changed","sourceUrl":"https://en.wikipedia.org/wiki/Weber–Fechner_law"},{"name":"Confirmation bias","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Confirmation_bias"},{"name":"Congruence bias","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Congruence_bias"},{"name":"Post–purchase rationalization","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Choice-supportive_bias"},{"name":"Choice–supportive bias","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Choice-supportive_bias"},{"name":"Selective perception","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Selective_perception"},{"name":"Observer–expectancy effect","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Observer-expectancy_effect"},{"name":"Experimenter's bias","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Observer-expectancy_effect"},{"name":"Observer effect","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Observer-expectancy_effect"},{"name":"Expectation bias","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Observer-expectancy_effect"},{"name":"Ostrich effect","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Ostrich_effect"},{"name":"Subjective validation","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Subjective_validation"},{"name":"Continued influence effect","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Confirmation_bias#continued_influence_effect"},{"name":"Semmelweis reflex","category":"Too Much Information","subcategory":"We are drawn to details that confirm our own existing beliefs","sourceUrl":"https://en.wikipedia.org/wiki/Semmelweis_reflex"},{"name":"Bias blind spot","category":"Too Much Information","subcategory":"We notice flaws in others more easily than we notice flaws in ourselves","sourceUrl":"https://en.wikipedia.org/wiki/Bias_blind_spot"},{"name":"Naïve cynicism","category":"Too Much Information","subcategory":"We notice flaws in others more easily than we notice flaws in ourselves","sourceUrl":"https://en.wikipedia.org/wiki/Naïve_cynicism"},{"name":"Naïve realism","category":"Too Much Information","subcategory":"We notice flaws in others more easily than we notice flaws in ourselves","sourceUrl":"https://en.wikipedia.org/wiki/Naïve_realism_(psychology)"},{"name":"Confabulation","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Confabulation"},{"name":"Clustering illusion","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Clustering_illusion"},{"name":"Insensitivity to sample size","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Insensitivity_to_sample_size"},{"name":"Neglect of probability","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Neglect_of_probability"},{"name":"Anecdotal fallacy","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Anecdotal_evidence"},{"name":"Illusion of validity","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Illusion_of_validity"},{"name":"Masked–man fallacy","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Masked-man_fallacy"},{"name":"Recency illusion","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Recency_illusion"},{"name":"Gambler's fallacy","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Gambler's_fallacy"},{"name":"Hot–hand fallacy","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Hot-hand_fallacy"},{"name":"Illusory correlation","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Illusory_correlation"},{"name":"Pareidolia","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Pareidolia"},{"name":"Anthropomorphism","category":"Not Enough Meaning","subcategory":"We tend to find stories and patterns even when looking at sparse data","sourceUrl":"https://en.wikipedia.org/wiki/Anthropomorphism#Psychology"},{"name":"Group attribution error","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Group_attribution_error"},{"name":"Ultimate attribution error","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Ultimate_attribution_error"},{"name":"Stereotyping","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Stereotype"},{"name":"Essentialism","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Essentialism"},{"name":"Functional fixedness","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Functional_fixedness"},{"name":"Moral credential effect","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Self-licensing"},{"name":"Just–world hypothesis","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Just-world_hypothesis"},{"name":"Argument from fallacy","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Argument_from_fallacy"},{"name":"Authority bias","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Authority_bias"},{"name":"Automation bias","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Automation_bias"},{"name":"Bandwagon effect","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Bandwagon_effect"},{"name":"Placebo effect","category":"Not Enough Meaning","subcategory":"We fill in characteristics from stereotypes, generalities, and prior histories","sourceUrl":"https://en.wikipedia.org/wiki/Placebo"},{"name":"Out–group homogeneity bias","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Out-group_homogeneity"},{"name":"Cross–race effect","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Cross-race_effect"},{"name":"In–group favoritism","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/In-group_favoritism"},{"name":"Halo effect","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Halo_effect"},{"name":"Cheerleader effect","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Cheerleader_effect"},{"name":"Positivity effect","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Positivity_effect"},{"name":"Not invented here","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Not_invented_here"},{"name":"Reactive devaluation","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Reactive_devaluation"},{"name":"Well–traveled road effect","category":"Not Enough Meaning","subcategory":"We imagine things and people we're familiar with or fond of as better","sourceUrl":"https://en.wikipedia.org/wiki/Well_travelled_road_effect"},{"name":"Mental accounting","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Mental_accounting"},{"name":"Appeal to probability fallacy","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Appeal_to_probability"},{"name":"Normalcy bias","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Normalcy_bias"},{"name":"Murphy's Law","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Murphy's_law"},{"name":"Zero sum bias","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Zero-sum_thinking"},{"name":"Survivorship bias","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Survivorship_bias"},{"name":"Subadditivity effect","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Subadditivity_effect"},{"name":"Denomination effect","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/Denomination_effect"},{"name":"The magical number 7 ± 2","category":"Not Enough Meaning","subcategory":"We simplify probabilities and numbers to make them easier to think about","sourceUrl":"https://en.wikipedia.org/wiki/The_Magical_Number_Seven,_Plus_or_Minus_Two"},{"name":"Illusion of transparency","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Illusion_of_transparency"},{"name":"Curse of knowledge","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Curse_of_knowledge"},{"name":"Spotlight effect","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Spotlight_effect"},{"name":"Extrinsic incentive error","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Extrinsic_incentives_bias"},{"name":"Illusion of external agency","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Illusion_of_external_agency"},{"name":"Illusion of asymmetric insight","category":"Not Enough Meaning","subcategory":"We think we know what other people are thinking","sourceUrl":"https://en.wikipedia.org/wiki/Illusion_of_asymmetric_insight"},{"name":"Telescoping effect","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Telescoping_effect"},{"name":"Rosy retrospection","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Rosy_retrospection"},{"name":"Hindsight bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Hindsight_bias"},{"name":"Outcome bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Outcome_bias"},{"name":"Moral luck","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Moral_luck"},{"name":"Declinism","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Declinism"},{"name":"Impact bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Impact_bias"},{"name":"Pessimism bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Optimism_bias#Pessimism_bias"},{"name":"Planning fallacy","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Planning_fallacy"},{"name":"Time–saving bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Time-saving_bias"},{"name":"Pro–innovation bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Pro-innovation_bias"},{"name":"Projection bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Affective_forecasting#Projection_bias"},{"name":"Restraint bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/Restraint_bias"},{"name":"Self–consistency bias","category":"Not Enough Meaning","subcategory":"We project our current mindset and assumptions onto the past and future","sourceUrl":"https://en.wikipedia.org/wiki/List_of_cognitive_biases#Consistency_bias"},{"name":"Overconfidence effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Overconfidence_effect"},{"name":"Social desirability bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Social_desirability_bias"},{"name":"Third–person effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Third-person_effect"},{"name":"False consensus effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/False_consensus_effect"},{"name":"Hard–easy effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Hard–easy_effect"},{"name":"Lake Wobegone effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Lake_Wobegon#The_Lake_Wobegon_effect"},{"name":"Dunning–Kruger effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Dunning–Kruger_effect"},{"name":"Egocentric bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Egocentric_bias"},{"name":"Optimism bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Optimism_bias"},{"name":"Forer effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Barnum_effect"},{"name":"Barnum effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Barnum_effect"},{"name":"Self–serving bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Self-serving_bias"},{"name":"Actor–observer bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Actor–observer_asymmetry#bias"},{"name":"Illusion of control","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Illusion_of_control"},{"name":"Illusory superiority","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Illusory_superiority"},{"name":"Fundamental attribution error","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Fundamental_attribution_error"},{"name":"Defensive attribution hypothesis","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Defensive_attribution_hypothesis"},{"name":"Trait ascription bias","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Trait_ascription_bias"},{"name":"Effort justification","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Effort_justification"},{"name":"Risk compensation","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Risk_compensation"},{"name":"Peltzman effect","category":"Need To Act Fast","subcategory":"To act, we must be confident we can make an impact and feel what we do is important","sourceUrl":"https://en.wikipedia.org/wiki/Risk_compensation#Peltzman_effect"},{"name":"Hyperbolic discounting","category":"Need To Act Fast","subcategory":"To stay focused, we favor the immediate, relatable thing in front of us","sourceUrl":"https://en.wikipedia.org/wiki/Hyperbolic_discounting"},{"name":"Appeal to novelty","category":"Need To Act Fast","subcategory":"To stay focused, we favor the immediate, relatable thing in front of us","sourceUrl":"https://en.wikipedia.org/wiki/Appeal_to_novelty"},{"name":"Identifiable victim effect","category":"Need To Act Fast","subcategory":"To stay focused, we favor the immediate, relatable thing in front of us","sourceUrl":"https://en.wikipedia.org/wiki/Identifiable_victim_effect"},{"name":"Sunk cost fallacy","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Sunk_cost#Loss_aversion_and_the_sunk_cost_fallacy"},{"name":"Irrational escalation","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Escalation_of_commitment"},{"name":"Escalation of commitment","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Escalation_of_commitment"},{"name":"Generation effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Generation_effect"},{"name":"Loss aversion","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Loss_aversion"},{"name":"IKEA effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/IKEA_effect"},{"name":"Unit bias","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/List_of_cognitive_biases"},{"name":"Zero–risk bias","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Zero-risk_bias"},{"name":"Disposition effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Disposition_effect"},{"name":"Pseudocertainty effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Pseudocertainty_effect"},{"name":"Processing difficulty effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/List_of_cognitive_biases#Processing_difficulty_effect"},{"name":"Endowment effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Endowment_effect"},{"name":"Backfire effect","category":"Need To Act Fast","subcategory":"To get things done, we tend to complete things we've invested time and energy in","sourceUrl":"https://en.wikipedia.org/wiki/Confirmation_bias#backfire_effect"},{"name":"System justification","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/System_justification"},{"name":"Reverse psychology","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/Reverse_psychology"},{"name":"Reactance","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/Reactance_(psychology)"},{"name":"Decoy effect","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/Decoy_effect"},{"name":"Social comparison effect","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/Social_comparison_bias"},{"name":"Status quo bias","category":"Need To Act Fast","subcategory":"To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions","sourceUrl":"https://en.wikipedia.org/wiki/Status_quo_bias"},{"name":"Ambiguity bias","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Ambiguity_effect"},{"name":"Information bias","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Information_bias_(psychology)"},{"name":"Belief bias","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Belief_bias"},{"name":"Rhyme–as–reason effect","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Rhyme-as-reason_effect"},{"name":"Bike–shedding effect","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Law_of_triviality"},{"name":"Law of Triviality","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Law_of_triviality"},{"name":"Conjunction fallacy","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Conjunction_fallacy"},{"name":"Occam's razor","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Occam's_razor"},{"name":"Less–is–better effect","category":"Need To Act Fast","subcategory":"We favor simple–looking options and complete information over complex, ambiguous options","sourceUrl":"https://en.wikipedia.org/wiki/Less-is-better_effect"},{"name":"Misattribution of memory","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/Misattribution_of_memory"},{"name":"Source confusion","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/Misattribution_of_memory#Source_confusion"},{"name":"Cryptomnesia","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/Cryptomnesia"},{"name":"False memory","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/False_memory"},{"name":"Suggestibility","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/Suggestibility"},{"name":"Spacing effect","category":"What Should We Remember?","subcategory":"We edit and reinforce some memories after the fact","sourceUrl":"https://en.wikipedia.org/wiki/Spacing_effect"},{"name":"Implicit association","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Implicit_stereotype"},{"name":"Implicit stereotypes","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Implicit_stereotype"},{"name":"Stereotypical bias","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Implicit_stereotype"},{"name":"Prejudice","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Prejudice"},{"name":"Negativity bias","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Negativity_bias"},{"name":"Fading affect bias","category":"What Should We Remember?","subcategory":"We discard specifics to form generalities","sourceUrl":"https://en.wikipedia.org/wiki/Fading_affect_bias"},{"name":"Peak–end rule","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Peak–end_rule"},{"name":"Leveling and sharpening","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Leveling_and_sharpening"},{"name":"Misinformation effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Misinformation_effect"},{"name":"Serial recall effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Recall_(memory)#Serial_recall"},{"name":"List–length effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Recall_(memory)#Serial_recall"},{"name":"Duration neglect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Duration_neglect"},{"name":"Modality effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Modality_effect"},{"name":"Memory inhibition","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Memory_inhibition"},{"name":"Primacy effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Serial-position_effect#Primacy_effect"},{"name":"Recency effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Serial-position_effect#Recency_effect"},{"name":"Part–set cueing effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Memory_inhibition#Part-set_cuing_effect"},{"name":"Serial–position effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/Serial-position_effect"},{"name":"Suffix effect","category":"What Should We Remember?","subcategory":"We reduce events and lists to their key elements","sourceUrl":"https://en.wikipedia.org/wiki/List_of_cognitive_biases#Suffix_effect"},{"name":"Levels–of–processing effect","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Levels-of-processing_effect"},{"name":"Absent–mindedness","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Absent-mindedness"},{"name":"Testing effect","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Testing_effect"},{"name":"Next–in–line effect","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Next-in-line_effect"},{"name":"Google effect","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Google_effect"},{"name":"Tip of the tongue phenomenon","category":"What Should We Remember?","subcategory":"We store memories differently based on how they were experienced","sourceUrl":"https://en.wikipedia.org/wiki/Tip_of_the_tongue"}];
+
+    var CATEGORY_ORDER = [
+      "Too Much Information",
+      "Not Enough Meaning",
+      "Need To Act Fast",
+      "What Should We Remember?"
+    ];
+
+    var CATEGORY_CLASS = {
+      "Too Much Information": "tone-info",
+      "Not Enough Meaning": "tone-meaning",
+      "Need To Act Fast": "tone-act",
+      "What Should We Remember?": "tone-memory"
+    };
+
+    var CATEGORY_LENSES = {
+      "Too Much Information": "People may be responding to what is vivid, repeated, changed, confirming, or especially noticeable.",
+      "Not Enough Meaning": "People may be filling gaps with patterns, stereotypes, simplified numbers, assumptions about minds, or present-day projections.",
+      "Need To Act Fast": "People may be prioritising action, immediacy, completion, autonomy, status, simplicity, or a feeling of certainty.",
+      "What Should We Remember?": "People may be reconstructing, generalising, compressing, or retrieving memories according to how they were experienced."
+    };
+
+    var SUBCATEGORY_LENSES = {
+      "We notice things already primed in memory or repeated often": "Information that is already active in memory or encountered repeatedly can become easier to notice or judge as familiar.",
+      "Bizarre, funny, visually striking, or anthropomorphic things stick out more than non-bizarre/unfunny things": "Unusual, vivid, funny, visual, or human-like material can attract attention and remain memorable.",
+      "We notice when something has changed": "A change in context, comparison, price, or presentation can become more salient than the underlying absolute level.",
+      "We are drawn to details that confirm our own existing beliefs": "An existing belief can guide what evidence is selected, interpreted, or remembered.",
+      "We notice flaws in others more easily than we notice flaws in ourselves": "People can apply different standards to their own behaviour and to other people's behaviour.",
+      "We tend to find stories and patterns even when looking at sparse data": "Sparse or random information can invite a coherent story, pattern, or cause that the evidence does not fully support.",
+      "We fill in characteristics from stereotypes, generalities, and prior histories": "A group label, prior history, or general impression can fill in missing information about a person or situation.",
+      "We imagine things and people we're familiar with or fond of as better": "Familiarity, attachment, or prior investment can make an option or person seem especially good.",
+      "We simplify probabilities and numbers to make them easier to think about": "Complex quantities, probabilities, or numbers can be mentally compressed into easier but less precise forms.",
+      "We think we know what other people are thinking": "People can overestimate how transparent their own thoughts are or how accurately they understand another person's mind.",
+      "We project our current mindset and assumptions onto the past and future": "Current feelings, beliefs, and constraints can colour memories of the past and predictions about the future.",
+      "To act, we must be confident we can make an impact and feel what we do is important": "A feeling of efficacy, importance, or personal impact can make action seem worthwhile or necessary.",
+      "To stay focused, we favor the immediate, relatable thing in front of us": "Immediate, concrete, or emotionally relatable outcomes can crowd out distant or abstract consequences.",
+      "To get things done, we tend to complete things we've invested time and energy in": "Past effort, ownership, or commitment can create pressure to continue or finish.",
+      "To avoid mistakes, we aim to preserve autonomy and group status, and avoid irreversible decisions": "People may protect control, belonging, reputation, and reversibility when choices feel risky.",
+      "We favor simple-looking options and complete information over complex, ambiguous options": "Simplicity and apparent completeness can feel safer than ambiguity, even when complexity contains useful information.",
+      "We edit and reinforce some memories after the fact": "Later information, suggestions, and interpretations can alter how an earlier event is remembered.",
+      "We discard specifics to form generalities": "Specific details can fade while broader impressions, associations, or categories remain.",
+      "We reduce events and lists to their key elements": "Memory may preserve selected peaks, positions, or summaries rather than every part of an event or list.",
+      "We store memories differently based on how they were experienced": "Attention, depth of processing, context, and divided attention can shape what is later accessible."
+    };
+
+    var CURATED = {
+      "Availability heuristic": {
+        signals: ["easy to recall", "comes to mind", "recent news", "vivid example", "memorable example", "available in memory", "think of an example"],
+        shortDefinition: "Judging how common, likely, or important something is by how easily examples come to mind.",
+        shortcutPattern: "A memorable or easily recalled example stands in for a broader estimate.",
+        everydayExamples: ["After hearing several stories about a rare accident, someone feels that accident is very likely.", "A student estimates that a topic is common because examples from class come to mind quickly."],
+        appliedExample: "A consumer sees several viral complaints about a brand and concludes that most customers must have a bad experience, without checking the base rate.",
+        adaptiveFunction: "Quick recall can be a useful first alert when recent examples genuinely signal a changing environment.",
+        risks: "Vivid examples may be unusual, emotionally charged, or overrepresented in media.",
+        diagnosticQuestions: ["Am I estimating frequency from examples that are memorable rather than representative?", "What base rate or less vivid evidence would I check?"],
+        commonConfusions: ["Frequency illusion", "Negativity bias"]
+      },
+      "Anchoring": {
+        signals: ["first price", "initial price", "starting price", "first number", "reference point", "anchor", "later price", "seem reasonable", "made the later price"],
+        shortDefinition: "Relying too heavily on an initial number, comparison, or reference point when making a later judgment.",
+        shortcutPattern: "The first salient value becomes a mental starting point, and later adjustments remain too close to it.",
+        everydayExamples: ["A first salary figure changes what someone considers a fair offer.", "A discount seems attractive because it is compared with a high original price."],
+        appliedExample: "A retailer shows a high reference price before a sale price, making the sale price feel reasonable even when the buyer has not checked alternatives.",
+        adaptiveFunction: "A reference point can make an unfamiliar decision faster when it is relevant and trustworthy.",
+        risks: "An arbitrary or inflated starting point can distort valuation and comparison.",
+        diagnosticQuestions: ["Would my judgment change if I had seen the options in a different order?", "Did I independently check whether the initial number was relevant?"],
+        commonConfusions: ["Framing effect", "Focusing effect"]
+      },
+      "Confirmation bias": {
+        signals: ["looked for evidence supporting", "supporting what i believed", "confirmed what i thought", "ignored opposing evidence", "only noticed evidence", "already believed"],
+        shortDefinition: "Seeking, noticing, and interpreting information in ways that support an existing belief.",
+        shortcutPattern: "An existing conclusion becomes a filter for what counts as relevant evidence.",
+        everydayExamples: ["Someone reads several articles that agree with their view and dismisses articles that challenge it.", "A manager notices the mistakes of an employee they already distrust but overlooks similar mistakes by others."],
+        appliedExample: "A consumer who expects a product to be excellent notices its strengths and treats negative reviews as unimportant.",
+        adaptiveFunction: "Following a stable belief can reduce search effort when the belief is well supported and the environment is familiar.",
+        risks: "Contradictory evidence may be missed, dismissed, or explained away.",
+        diagnosticQuestions: ["What evidence would count against my current view?", "Did I search for disconfirming information with the same effort?"],
+        commonConfusions: ["Selective perception", "Choice–supportive bias"]
+      },
+      "Sunk cost fallacy": {
+        signals: ["already spent", "spent so much", "time and money", "invested so much", "already invested", "cannot waste", "because i had paid", "keep supporting a project"],
+        shortDefinition: "Letting unrecoverable past costs influence whether to continue, even though those costs cannot be changed.",
+        shortcutPattern: "Past investment is treated as a reason to continue instead of evaluating the remaining costs and benefits.",
+        everydayExamples: ["Someone finishes a disappointing film because they already paid for the ticket.", "A student keeps using a difficult method because they have already spent hours learning it."],
+        appliedExample: "A team keeps funding a weak campaign because so much budget and effort has already gone into it.",
+        adaptiveFunction: "Persistence can protect valuable projects when past investment is also evidence of future value.",
+        risks: "Continuing can compound losses and distract from better alternatives.",
+        diagnosticQuestions: ["If I had not already invested, would I choose to continue today?", "What future costs and benefits matter from this point onward?"],
+        commonConfusions: ["Escalation of commitment", "Irrational escalation"]
+      },
+      "Escalation of commitment": {
+        signals: ["kept supporting", "kept funding", "doubled down", "proved it would work", "defend the decision", "continue after failure", "commit more"],
+        shortDefinition: "Increasing commitment to a course of action after signs that it may be failing, often to justify an earlier choice.",
+        shortcutPattern: "New effort is added to defend or rescue a previous commitment rather than reconsidering the direction.",
+        everydayExamples: ["A team adds staff to a failing project because stopping would feel like admitting a mistake.", "Someone keeps arguing for a plan after new evidence shows it is unlikely to work."],
+        appliedExample: "A brand keeps increasing media spending on a weak campaign because the team wants the original strategy to succeed.",
+        adaptiveFunction: "Persistence can be valuable when early setbacks are temporary and learning improves the plan.",
+        risks: "Additional investment may be driven by pride, loss avoidance, or self-justification.",
+        diagnosticQuestions: ["Am I adding resources because the plan is improving or because I need to defend it?", "What would an independent decision-maker recommend now?"],
+        commonConfusions: ["Sunk cost fallacy", "Irrational escalation"]
+      },
+      "Irrational escalation": {
+        signals: ["kept going despite losses", "added more after failure", "continued because of pride", "would not quit", "doubled down"],
+        shortDefinition: "Continuing or intensifying a commitment despite evidence that the course of action is not working.",
+        shortcutPattern: "The desire to avoid admitting defeat or losing control overrides a fresh evaluation.",
+        everydayExamples: ["A person keeps repairing an unreliable device because stopping feels like defeat.", "A group makes increasingly extreme arguments to protect a weak position."],
+        appliedExample: "A company keeps expanding a product line with poor demand because leaders have publicly promised success.",
+        adaptiveFunction: "Determination can help when persistence is needed to overcome temporary obstacles.",
+        risks: "The decision becomes harder to revise as losses and reputational pressure grow.",
+        diagnosticQuestions: ["What new evidence would justify stopping?", "Would I choose this action if nobody knew about my earlier decision?"],
+        commonConfusions: ["Sunk cost fallacy", "Escalation of commitment"]
+      },
+      "Frequency illusion": {
+        signals: ["notice it everywhere", "seeing it everywhere", "started noticing", "suddenly everywhere", "after learning about", "see the brand everywhere"],
+        shortDefinition: "Noticing something more often after it has recently become salient, even when its actual frequency has not changed.",
+        shortcutPattern: "New attention makes an existing feature feel newly common.",
+        everydayExamples: ["After learning a word, someone notices it repeatedly in articles.", "After considering a car model, a person suddenly sees that model on many roads."],
+        appliedExample: "After learning about a brand, a student feels that the brand appears everywhere and may infer that it is rapidly becoming more popular.",
+        adaptiveFunction: "Heightened attention can help detect relevant opportunities or threats in a noisy environment.",
+        risks: "Noticing more does not necessarily mean the thing has become more prevalent.",
+        diagnosticQuestions: ["Did the environment change, or did my attention change?", "What evidence would tell me whether frequency actually increased?"],
+        commonConfusions: ["Baader–Meinhof Phenomenon", "Availability heuristic"]
+      },
+      "Baader–Meinhof Phenomenon": {
+        signals: ["learned about it", "started seeing it", "appeared everywhere", "noticed it everywhere", "newly noticed", "frequency after learning"],
+        shortDefinition: "The feeling that something newly noticed is suddenly appearing everywhere, usually because attention and memory have become tuned to it.",
+        shortcutPattern: "A new idea or object becomes salient, and subsequent encounters are selectively noticed and remembered.",
+        everydayExamples: ["A person hears an unfamiliar name and then sees it twice that week, interpreting the coincidence as a surge.", "A student learns a theory and begins spotting it in ordinary conversations."],
+        appliedExample: "A shopper learns about a niche product and then interprets every later sighting as evidence that the product is becoming mainstream.",
+        adaptiveFunction: "Rapidly detecting newly relevant information can support learning and exploration.",
+        risks: "Selective attention can be mistaken for a real change in prevalence.",
+        diagnosticQuestions: ["Would I have noticed these examples before learning the term?", "Can I compare the perceived increase with a more systematic count?"],
+        commonConfusions: ["Frequency illusion", "Mere–exposure effect"]
+      },
+      "Mere–exposure effect": {
+        signals: ["familiar", "seen it many times", "repeated exposure", "used to seeing", "recognisable", "felt comfortable because familiar", "liked because familiar"],
+        shortDefinition: "Developing a more favourable response to something simply because it has been encountered repeatedly.",
+        shortcutPattern: "Familiarity itself is used as a cue for safety, liking, or quality.",
+        everydayExamples: ["A song becomes more appealing after repeated plays.", "A person chooses a familiar restaurant even without comparing the menu."],
+        appliedExample: "A consumer prefers a repeatedly advertised brand because it feels familiar, not because they have verified that it performs better.",
+        adaptiveFunction: "Familiarity can reduce uncertainty and make routine choices efficient.",
+        risks: "Repeated exposure can be confused with evidence of quality or trustworthiness.",
+        diagnosticQuestions: ["Do I prefer it because I know it, or because I have evidence it is better?", "Would the preference remain if unfamiliar alternatives were described without brand names?"],
+        commonConfusions: ["Frequency illusion", "Well–traveled road effect"]
+      },
+      "Well–traveled road effect": {
+        signals: ["familiar option", "familiar brand", "usual brand", "same route", "always use", "known option", "little evidence it was better", "chose the familiar"],
+        shortDefinition: "Preferring a familiar or frequently used route, option, or solution because it feels safer and easier to navigate.",
+        shortcutPattern: "Prior familiarity substitutes for a fresh comparison of available alternatives.",
+        everydayExamples: ["Someone takes the usual route even when a new route may be faster.", "A student reuses a familiar study method without checking whether another method would work better."],
+        appliedExample: "A shopper chooses the familiar brand despite limited evidence that it is better than less familiar alternatives.",
+        adaptiveFunction: "A known option often reduces search time and the risk of an unpleasant surprise.",
+        risks: "The familiar option may be merely familiar, not optimal.",
+        diagnosticQuestions: ["What evidence supports this option beyond familiarity?", "What would I choose if all options had equal familiarity?"],
+        commonConfusions: ["Mere–exposure effect", "Status quo bias"]
+      },
+      "Peak–end rule": {
+        signals: ["best moment and worst moment", "peak and end", "mainly by the best", "mainly by the worst", "remembered the holiday", "remembered the experience", "high point and ending"],
+        shortDefinition: "Remembering or evaluating an experience largely by its most intense moment and how it ended, rather than by its total duration or average.",
+        shortcutPattern: "A peak and the ending become a compressed summary of a longer experience.",
+        everydayExamples: ["A long trip is remembered through one spectacular day and a stressful final journey.", "A meal is judged mainly by its best dish and the final service interaction."],
+        appliedExample: "A customer gives a high rating to an event because of a dramatic finale even though much of the event was mediocre.",
+        adaptiveFunction: "A compact summary makes past experiences easier to compare and communicate.",
+        risks: "The summary can underweight duration, consistency, and ordinary moments.",
+        diagnosticQuestions: ["What happened during the parts that were neither especially good nor bad?", "Would my evaluation change if the ending were different?"],
+        commonConfusions: ["Recency illusion", "Serial–position effect"]
+      },
+      "Authority bias": {
+        signals: ["famous expert", "expert recommended", "authority recommended", "celebrity doctor", "because an expert said", "trusted the expert", "expert endorsement"],
+        shortDefinition: "Giving extra weight to a claim because it comes from someone perceived as an authority.",
+        shortcutPattern: "The source's status substitutes for independently evaluating the claim.",
+        everydayExamples: ["Someone accepts a financial claim because a famous investor says it.", "A student assumes a complex explanation is correct because a senior lecturer offered it."],
+        appliedExample: "A consumer assumes a product is effective because a recognised expert endorses it, without checking whether the expert has relevant evidence.",
+        adaptiveFunction: "Expertise can be a useful shortcut when the authority is genuinely qualified and independent.",
+        risks: "Status can be mistaken for competence, evidence, or impartiality.",
+        diagnosticQuestions: ["Is this person qualified for this exact claim?", "Would the evidence persuade me if the source were unknown?"],
+        commonConfusions: ["Halo effect", "Bandwagon effect"]
+      },
+      "Halo effect": {
+        signals: ["good impression", "famous person", "attractive", "because the person", "one positive quality", "assumed the product was good", "positive impression"],
+        shortDefinition: "Letting one positive feature, impression, or reputation spill over into judgments about unrelated qualities.",
+        shortcutPattern: "A favourable overall impression makes specific claims feel more credible or attractive.",
+        everydayExamples: ["A well-dressed applicant is assumed to be more competent.", "A friendly service interaction makes a customer judge the whole company more positively."],
+        appliedExample: "A product seems high quality because it is associated with a prestigious spokesperson, even though the product evidence is separate.",
+        adaptiveFunction: "A positive first impression can speed social and marketplace judgments when it is informative.",
+        risks: "A strength in one domain may not predict performance in another.",
+        diagnosticQuestions: ["Which specific attribute am I judging, and what evidence supports it?", "Would I make the same judgment if the positive feature were removed?"],
+        commonConfusions: ["Authority bias", "Bandwagon effect"]
+      },
+      "Bandwagon effect": {
+        signals: ["everyone uses", "popular", "many people", "everyone recommends", "because others", "crowd", "social proof", "other people chose"],
+        shortDefinition: "Adopting a belief, preference, or behaviour partly because many other people appear to have adopted it.",
+        shortcutPattern: "Perceived popularity becomes evidence that an option is correct, desirable, or safe.",
+        everydayExamples: ["Someone downloads an app because it is trending.", "A student changes their answer after seeing that most classmates chose another option."],
+        appliedExample: "A consumer infers that a restaurant must be good because it has a long queue and many positive social posts.",
+        adaptiveFunction: "Following others can provide useful information when their choices reflect relevant experience.",
+        risks: "Popularity can be circular, manufactured, or unrelated to quality.",
+        diagnosticQuestions: ["What does popularity tell me beyond popularity itself?", "Are the people I am following informed and independent?"],
+        commonConfusions: ["Authority bias", "Social proof"]
+      },
+      "Framing effect": {
+        signals: ["worded as", "presented as", "gain frame", "loss frame", "same information", "different wording", "survival rate", "risk wording"],
+        shortDefinition: "Changing a judgment by changing how equivalent information is presented or described.",
+        shortcutPattern: "The presentation of an option changes its meaning, emotional response, or perceived attractiveness.",
+        everydayExamples: ["People respond differently to a treatment described as having a 90% survival rate versus a 10% mortality rate.", "A fee feels different when described as a discount lost rather than a surcharge added."],
+        appliedExample: "A food product attracts more choice when its benefits are framed as gains rather than the same benefits framed as avoiding losses.",
+        adaptiveFunction: "Presentation can help people focus on a decision-relevant consequence.",
+        risks: "Equivalent options may feel unequal because of wording alone.",
+        diagnosticQuestions: ["Would I choose differently if the same facts were expressed another way?", "What is the underlying information after stripping away the wording?"],
+        commonConfusions: ["Anchoring", "Focusing effect"]
+      },
+      "Status quo bias": {
+        signals: ["default", "kept the same", "did not change", "familiar routine", "leave it as it is", "existing option", "avoid changing"],
+        shortDefinition: "Preferring the current state or default option simply because it is already in place.",
+        shortcutPattern: "The effort or risk of changing makes the existing option feel preferable.",
+        everydayExamples: ["Someone keeps the default settings without considering alternatives.", "A team renews the same process because changing it feels troublesome."],
+        appliedExample: "A customer remains with an existing service plan even when a better plan is available, because switching requires effort.",
+        adaptiveFunction: "Stability avoids unnecessary switching costs when the current option is acceptable.",
+        risks: "Inertia can preserve outdated or inferior arrangements.",
+        diagnosticQuestions: ["Would I choose this option from a blank slate?", "What cost or uncertainty is attached to changing?"],
+        commonConfusions: ["Loss aversion", "Well–traveled road effect"]
+      },
+      "Loss aversion": {
+        signals: ["fear of losing", "loss feels worse", "avoid a loss", "protect what i have", "potential loss", "give something up", "loss"],
+        shortDefinition: "Treating a loss as more psychologically significant than an equivalent gain.",
+        shortcutPattern: "The prospect of giving something up receives more weight than the prospect of gaining the same amount.",
+        everydayExamples: ["Someone refuses a fair gamble because the possible loss feels too painful.", "A person keeps an unwanted item because returning it feels like admitting a loss."],
+        appliedExample: "A limited-time offer makes a consumer act mainly to avoid losing a discount rather than because the product's benefits improved.",
+        adaptiveFunction: "Sensitivity to loss can protect resources and discourage careless risk-taking.",
+        risks: "Fear of loss can create inertia, urgency, and poor comparisons.",
+        diagnosticQuestions: ["Would this choice look different if described as gaining rather than avoiding a loss?", "What is the actual size and probability of the loss?"],
+        commonConfusions: ["Status quo bias", "Omission bias"]
+      },
+      "Hindsight bias": {
+        signals: ["knew it all along", "obvious afterwards", "after it happened", "predictable in retrospect", "should have known", "in hindsight"],
+        shortDefinition: "Seeing an outcome as having been more predictable after it has occurred than it was beforehand.",
+        shortcutPattern: "Knowledge of the outcome is folded back into the memory of what was expected.",
+        everydayExamples: ["After an exam result, a student feels the difficult question was obviously going to appear.", "After a match, a fan says the winner was clear from the start."],
+        appliedExample: "A manager judges an earlier forecast harshly because the market outcome now makes the correct answer seem obvious.",
+        adaptiveFunction: "Looking back can create a coherent lesson for future decisions.",
+        risks: "It can make uncertainty disappear and unfairly blame earlier decision-makers.",
+        diagnosticQuestions: ["What did I actually know before the outcome?", "Can I find my contemporaneous prediction rather than relying on memory?"],
+        commonConfusions: ["Outcome bias", "Rosy retrospection"]
+      },
+      "Outcome bias": {
+        signals: ["judged by result", "good result means good decision", "bad result means bad decision", "because it worked", "because it failed", "outcome"],
+        shortDefinition: "Evaluating the quality of a decision mainly by its eventual outcome rather than by the information and process available at the time.",
+        shortcutPattern: "A lucky result makes a weak process look good, or an unlucky result makes a reasonable process look bad.",
+        everydayExamples: ["A risky investment is praised because it happened to pay off.", "A careful decision is criticised because an unforeseeable event produced a bad outcome."],
+        appliedExample: "A campaign is labelled well designed because sales rose, even though the increase may have come from unrelated factors.",
+        adaptiveFunction: "Outcomes provide important feedback when interpreted alongside process and context.",
+        risks: "Luck and uncertainty can be mistaken for decision quality.",
+        diagnosticQuestions: ["Was the decision sensible given the information available then?", "Could the same process produce a different outcome by chance?"],
+        commonConfusions: ["Hindsight bias", "Self–serving bias"]
+      },
+      "Dunning–Kruger effect": {
+        signals: ["overestimated ability", "did not know what they did not know", "low skill high confidence", "confident but wrong", "thought i was an expert"],
+        shortDefinition: "A pattern in which limited knowledge or skill can make it difficult to recognise one's own limitations.",
+        shortcutPattern: "The same lack of expertise that produces errors also limits recognition of those errors.",
+        everydayExamples: ["A beginner assumes a task is easy because they cannot yet see its complexities.", "Someone gives a confident answer without noticing the gaps in their understanding."],
+        appliedExample: "A new marketer dismisses research because the problem appears obvious before they understand the relevant evidence.",
+        adaptiveFunction: "Confidence can support experimentation and learning when it remains open to feedback.",
+        risks: "Uncalibrated confidence can reduce checking, learning, and receptiveness to correction.",
+        diagnosticQuestions: ["What evidence would test my confidence?", "Which parts of the task might be invisible to a beginner?"],
+        commonConfusions: ["Overconfidence effect", "Naïve realism"]
+      },
+      "Negativity bias": {
+        signals: ["negative review", "bad news", "flaw", "criticism", "bad experience", "negative detail", "worst part", "complaint"],
+        shortDefinition: "Giving negative information more attention or weight than equally positive information.",
+        shortcutPattern: "Potential harm or criticism becomes more salient than comparable benefits.",
+        everydayExamples: ["One critical comment dominates a person's memory of many compliments.", "A buyer focuses on one defect despite a product having many strengths."],
+        appliedExample: "A brand's single viral complaint shapes evaluation more strongly than hundreds of ordinary positive experiences.",
+        adaptiveFunction: "Prioritising possible threats can support caution and error detection.",
+        risks: "A few negative signals can create an unnecessarily bleak judgment.",
+        diagnosticQuestions: ["Is the negative information more diagnostic, or simply more attention-grabbing?", "What positive or neutral evidence balances it?"],
+        commonConfusions: ["Availability heuristic", "Focusing effect"]
+      },
+      "Choice–supportive bias": {
+        signals: ["justified my choice", "after buying", "defend my decision", "made the choice feel right", "post purchase", "support the option i chose"],
+        shortDefinition: "Remembering or evaluating a chosen option more favourably and rejected options less favourably after making a choice.",
+        shortcutPattern: "Post-choice interpretation protects the feeling that the decision was sensible.",
+        everydayExamples: ["After buying a laptop, someone remembers its strengths and downplays the benefits of alternatives.", "A diner convinces themselves that the chosen dish was obviously best after seeing another meal arrive."],
+        appliedExample: "A consumer revises their memory of a purchase so that the selected brand appears better and the rejected brands appear worse.",
+        adaptiveFunction: "Feeling settled after a choice can reduce unproductive regret and decision conflict.",
+        risks: "Post-choice confidence can hide genuine shortcomings or prevent learning.",
+        diagnosticQuestions: ["What did I think before choosing, and what changed afterward?", "Can I evaluate the option using the same criteria I used beforehand?"],
+        commonConfusions: ["Confirmation bias", "Post–purchase rationalization"]
+      }
+    };
+
+    var GUIDE_QUESTIONS = [
+      { text: "What were you trying to decide, judge, remember, or predict?", tags: ["decision", "judgment", "memory", "prediction"] },
+      { text: "What information did you notice first?", tags: ["first", "initial", "salient", "anchor"] },
+      { text: "Was there a vivid, recent, repeated, familiar, emotional, or unusual example?", tags: ["vivid", "recent", "repeated", "familiar", "emotional", "unusual"] },
+      { text: "Did a first number, price, comparison, or reference point influence you?", tags: ["first price", "first number", "reference point", "anchor"] },
+      { text: "Did you mainly look for evidence supporting what you already believed?", tags: ["supporting what i believed", "confirmation", "existing belief"] },
+      { text: "Did you treat one person or group as representative of a wider type?", tags: ["stereotype", "representative", "group", "generalise"] },
+      { text: "Did you assume you knew what another person was thinking?", tags: ["mind", "what they were thinking", "assume", "transparent"] },
+      { text: "Did the outcome influence how you remembered or evaluated the decision?", tags: ["outcome", "afterwards", "in hindsight", "remembered"] },
+      { text: "Did prior effort, ownership, fear of loss, or commitment make you continue?", tags: ["already spent", "invested", "ownership", "loss", "continue", "commitment"] },
+      { text: "Did you prefer the familiar or default option?", tags: ["familiar", "default", "usual", "status quo"] },
+      { text: "Did a simple explanation feel more convincing than a complex or ambiguous one?", tags: ["simple", "ambiguous", "complex", "complete information"] },
+      { text: "Did an immediate benefit feel more important than a later consequence?", tags: ["immediate", "later", "future", "short term"] },
+      { text: "What information might a slower, more deliberate thinker have checked?", tags: ["check", "compare", "evidence", "slow", "deliberate"] }
+    ];
+
+    var RANDOM_EXAMPLES = [
+      "I bought the more expensive option because the first price I saw made it seem reasonable.",
+      "I kept watching a series I no longer enjoyed because I had already spent so much time on it.",
+      "After a friend mentioned a particular phone, I began noticing that model everywhere.",
+      "I remembered a group project as a success mainly because of the exciting final presentation.",
+      "I assumed a colleague was ignoring my message because I was already annoyed with them.",
+      "I chose the default settings because changing them felt like unnecessary risk."
+    ];
+
+    var FOLLOWUP_ANSWERS = [];
+    var GUIDE_CURSOR = 0;
+    var LAST_ANALYSIS = { text: "", results: [] };
+    var ENTRY_BY_NAME = {};
+
+    function normalize(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[\u2010-\u2015]/g, "-")
+        .replace(/[’‘]/g, "'")
+        .replace(/[^a-z0-9\u00c0-\u024f\s-]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function tokens(value) {
+      var stop = {
+        "the": 1, "a": 1, "an": 1, "and": 1, "or": 1, "of": 1, "to": 1,
+        "in": 1, "on": 1, "for": 1, "we": 1, "i": 1, "it": 1, "is": 1,
+        "was": 1, "were": 1, "my": 1, "me": 1, "this": 1, "that": 1,
+        "with": 1, "as": 1, "from": 1, "more": 1, "than": 1, "by": 1,
+        "effect": 1, "bias": 1, "fallacy": 1, "heuristic": 1, "phenomenon": 1
+      };
+      return normalize(value).split(/[\s-]+/).filter(function (x) {
+        return x.length > 2 && !stop[x];
+      });
+    }
+
+    function unique(list) {
+      var seen = {};
+      return (list || []).filter(function (x) {
+        var key = normalize(x);
+        if (!key || seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+    }
+
+    function typeFor(name) {
+      var n = name.toLowerCase();
+      if (n.indexOf("heuristic") >= 0) return "heuristic";
+      if (n.indexOf("bias") >= 0) return "bias";
+      if (n.indexOf("fallacy") >= 0) return "fallacy";
+      if (n.indexOf("effect") >= 0) return "effect";
+      if (n.indexOf("phenomenon") >= 0) return "phenomenon";
+      return "codex item";
+    }
+
+    function slug(value) {
+      return normalize(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+
+    function genericExamples(entry) {
+      var lens = SUBCATEGORY_LENSES[entry.subcategory] || CATEGORY_LENSES[entry.category];
+      return [
+        "A person faces an ordinary choice and lets a quick cue related to this pattern stand in for a fuller comparison.",
+        "A student notices " + lens.charAt(0).toLowerCase() + lens.slice(1) + " and reaches a conclusion before checking every alternative."
+      ];
+    }
+
+    function genericApplied(entry) {
+      return "In a consumer, marketing, classroom, or workplace setting, " + entry.name.toLowerCase() + " may shape what people notice, infer, remember, or choose before they conduct a slower evaluation.";
+    }
+
+    function genericSignals(entry) {
+      var cleaned = entry.name
+        .replace(/\b(heuristic|bias|effect|fallacy|phenomenon|law)\b/gi, "")
+        .replace(/[–—]/g, " ");
+      return unique([cleaned, entry.name, entry.subcategory].concat(tokens(entry.name), tokens(entry.subcategory)));
+    }
+
+    function makeEntry(source, index) {
+      var custom = CURATED[source.name] || {};
+      var entry = {
+        id: "codex-" + String(index + 1).padStart(3, "0") + "-" + slug(source.name),
+        name: source.name,
+        category: source.category,
+        subcategory: source.subcategory,
+        sourceUrl: source.sourceUrl,
+        type: typeFor(source.name),
+        shortDefinition: custom.shortDefinition || "A " + typeFor(source.name) + " describing how " + (SUBCATEGORY_LENSES[source.subcategory] || CATEGORY_LENSES[source.category]).toLowerCase(),
+        shortcutPattern: custom.shortcutPattern || "A quick cue-to-interpretation move connected with this codex entry.",
+        positiveCues: custom.signals ? custom.signals.slice(0, 5) : [SUBCATEGORY_LENSES[source.subcategory] || CATEGORY_LENSES[source.category]],
+        negativeCues: custom.negativeCues || ["The cue may not be representative of the wider situation.", "A slower comparison may reveal relevant information that the shortcut leaves out."],
+        everydayExamples: custom.everydayExamples || genericExamples(source),
+        appliedExample: custom.appliedExample || genericApplied(source),
+        adaptiveFunction: custom.adaptiveFunction || "The shortcut can sometimes save time, reduce mental effort, and provide a workable first response when attention or information is limited.",
+        risks: custom.risks || "A quick response may become misleading when the cue is vivid but incomplete, unusual, outdated, or unrelated to the decision.",
+        commonConfusions: custom.commonConfusions || [],
+        diagnosticQuestions: custom.diagnosticQuestions || [
+          "What cue did I rely on, and how closely is it connected to the judgment I made?",
+          "What would I want to check before treating this quick impression as a conclusion?"
+        ],
+        signals: unique((custom.signals || []).concat(genericSignals(source))),
+        aliases: custom.aliases || []
+      };
+      ENTRY_BY_NAME[entry.name] = entry;
+      return entry;
+    }
+
+    var ENTRIES = SOURCE_ENTRIES.map(makeEntry);
+
+    function findEntry(name) {
+      return ENTRY_BY_NAME[name] || null;
+    }
+
+    function relatedEntries(entry) {
+      var names = (entry.commonConfusions || []).filter(function (name) { return !!findEntry(name); });
+      if (names.length < 2) {
+        ENTRIES.forEach(function (candidate) {
+          if (candidate.name !== entry.name && candidate.subcategory === entry.subcategory && names.indexOf(candidate.name) < 0 && names.length < 2) {
+            names.push(candidate.name);
+          }
+        });
+      }
+      if (names.length < 2) {
+        ENTRIES.forEach(function (candidate) {
+          if (candidate.name !== entry.name && candidate.category === entry.category && names.indexOf(candidate.name) < 0 && names.length < 2) {
+            names.push(candidate.name);
+          }
+        });
+      }
+      return names.slice(0, 2).map(findEntry).filter(Boolean);
+    }
+
+    function scoreEntry(entry, text) {
+      var normalizedText = normalize(text);
+      var textTokens = tokens(normalizedText);
+      var tokenSet = {};
+      textTokens.forEach(function (t) { tokenSet[t] = true; });
+      var score = 0;
+      var evidence = [];
+      var signalList = unique((entry.signals || []).concat(entry.aliases || []));
+      signalList.forEach(function (signal) {
+        var phrase = normalize(signal);
+        if (!phrase || phrase.length < 3) return;
+        var phraseTokens = tokens(phrase);
+        if (phrase.indexOf(" ") >= 0 && normalizedText.indexOf(phrase) >= 0) {
+          score += phraseTokens.length >= 3 ? 10 : 7;
+          if (evidence.length < 6) evidence.push("phrase: “" + signal + "”");
+          return;
+        }
+        var hits = phraseTokens.filter(function (t) { return tokenSet[t]; });
+        if (hits.length >= 2) {
+          score += Math.min(5, hits.length * 1.35);
+          if (evidence.length < 6) evidence.push("cues: " + hits.slice(0, 3).join(", "));
+        } else if (hits.length === 1 && phraseTokens.length === 1 && phraseTokens[0].length > 4) {
+          score += 1.25;
+          if (evidence.length < 6) evidence.push("cue: " + hits[0]);
+        }
+      });
+
+      var subTokens = tokens(entry.subcategory);
+      var subHits = subTokens.filter(function (t) { return tokenSet[t]; });
+      if (subHits.length >= 2) score += Math.min(2.5, subHits.length * .55);
+
+      var categoryHits = tokens(entry.category).filter(function (t) { return tokenSet[t]; });
+      score += Math.min(1, categoryHits.length * .25);
+
+      var negative = entry.negativeCues || [];
+      negative.forEach(function (cue) {
+        var cueTokens = tokens(cue);
+        var overlap = cueTokens.filter(function (t) { return tokenSet[t]; }).length;
+        if (overlap >= 3) score -= 1.25;
+      });
+
+      return { entry: entry, score: Math.max(0, score), evidence: unique(evidence) };
+    }
+
+    function confidence(score) {
+      if (score >= 9) return { label: "Strong candidate", className: "confidence-strong" };
+      if (score >= 4) return { label: "Plausible candidate", className: "confidence-plausible" };
+      return { label: "Needs more information", className: "confidence-weak" };
+    }
+
+    function analyseText(text) {
+      var ranked = ENTRIES.map(function (entry) { return scoreEntry(entry, text); })
+        .sort(function (a, b) { return b.score - a.score || a.entry.name.localeCompare(b.entry.name); });
+      return ranked.filter(function (item) { return item.score > 0; }).slice(0, 3);
+    }
+
+    function makeElement(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = text;
+      return node;
+    }
+
+    function makeButton(text, className, handler) {
+      var b = makeElement("button", className || "btn btn-outline", text);
+      b.type = "button";
+      b.addEventListener("click", handler);
+      return b;
+    }
+
+    function addTextBlock(parent, title, value, listMode) {
+      var block = makeElement("div", "detail-block");
+      var h = makeElement("h4", "", title);
+      block.appendChild(h);
+      if (listMode && Array.isArray(value)) {
+        var ul = makeElement("ul");
+        value.forEach(function (item) { ul.appendChild(makeElement("li", "", item)); });
+        block.appendChild(ul);
+      } else {
+        block.appendChild(makeElement("p", "", value));
+      }
+      parent.appendChild(block);
+      return block;
+    }
+
+    function appendPath(parent, entry) {
+      var path = makeElement("div", "path");
+      var category = makeElement("span", CATEGORY_CLASS[entry.category], entry.category);
+      var arrow = makeElement("span", "path-arrow", "→");
+      var sub = makeElement("span", "", entry.subcategory);
+      path.appendChild(category);
+      path.appendChild(arrow);
+      path.appendChild(sub);
+      parent.appendChild(path);
+    }
+
+    function renderRelated(parent, entry) {
+      var block = makeElement("div", "detail-block full-width");
+      block.appendChild(makeElement("h4", "", "Related codex entries"));
+      var list = makeElement("div", "related-list");
+      relatedEntries(entry).forEach(function (related) {
+        list.appendChild(makeButton(related.name, "related-btn", function () {
+          showEntryDetail(related);
+          document.getElementById("entryDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+        }));
+      });
+      block.appendChild(list);
+      parent.appendChild(block);
+    }
+
+    function createMatchCard(result, rank, isDetail) {
+      var entry = result.entry || result;
+      var card = makeElement("article", "card match-card" + (isDetail ? " entry-detail-card" : ""));
+      var top = makeElement("div", "match-top");
+      var titleBox = makeElement("div");
+      titleBox.appendChild(makeElement("p", "match-kicker", isDetail ? "Codex entry" : "Possible codex match " + rank));
+      titleBox.appendChild(makeElement("h3", "", entry.name));
+      top.appendChild(titleBox);
+      if (!isDetail) {
+        var conf = confidence(result.score);
+        top.appendChild(makeElement("span", "confidence " + conf.className, conf.label));
+      } else {
+        top.appendChild(makeElement("span", "confidence confidence-plausible", entry.type));
+      }
+      card.appendChild(top);
+
+      var body = makeElement("div", "match-body");
+      appendPath(body, entry);
+
+      var grid = makeElement("div", "detail-grid");
+      addTextBlock(grid, "Short plain-language explanation", entry.shortDefinition, false);
+      addTextBlock(grid, "The shortcut in one sentence", entry.shortcutPattern, false);
+
+      if (!isDetail) {
+        var why = result.evidence.length
+          ? "This may fit because your description included " + result.evidence.join("; ") + "."
+          : "There is not yet a distinctive cue in the description, so this remains tentative.";
+        addTextBlock(grid, "Why this may fit your situation", why, false);
+        addTextBlock(grid, "Evidence or cues used", result.evidence.length ? result.evidence : ["No distinctive phrase-level cue detected yet."], true);
+      } else {
+        addTextBlock(grid, "Why it may matter", CATEGORY_LENSES[entry.category], false);
+      }
+
+      addTextBlock(grid, "Two everyday examples", entry.everydayExamples, true);
+      addTextBlock(grid, "Applied example", entry.appliedExample, false);
+      addTextBlock(grid, "How it can sometimes be useful", entry.adaptiveFunction, false);
+      addTextBlock(grid, "What can go wrong", entry.risks, false);
+      addTextBlock(grid, "Questions to ask yourself", entry.diagnosticQuestions, true);
+
+      var stronger = "It would be a stronger match if the situation involved " + (entry.positiveCues || ["the pattern described in the entry"]).slice(0, 2).join(" or ") + ".";
+      addTextBlock(grid, "What would distinguish it", stronger, false);
+      renderRelated(grid, entry);
+
+      var sourceBlock = makeElement("div", "detail-block full-width");
+      sourceBlock.appendChild(makeElement("h4", "", "Original codex link"));
+      var sourceLink = document.createElement("a");
+      sourceLink.href = entry.sourceUrl;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noopener noreferrer";
+      sourceLink.textContent = entry.sourceUrl;
+      sourceBlock.appendChild(sourceLink);
+      grid.appendChild(sourceBlock);
+
+      body.appendChild(grid);
+      card.appendChild(body);
+      return card;
+    }
+
+    function setStatus(id, message, kind) {
+      var node = document.getElementById(id);
+      node.textContent = message || "";
+      node.className = "status" + (kind ? " status-" + kind : "");
+    }
+
+    function renderGuide() {
+      var wrap = document.getElementById("guideQuestions");
+      wrap.textContent = "";
+      var shown = GUIDE_QUESTIONS.slice(GUIDE_CURSOR, GUIDE_CURSOR + 3);
+      if (!shown.length) {
+        GUIDE_CURSOR = 0;
+        shown = GUIDE_QUESTIONS.slice(0, 3);
+      }
+      shown.forEach(function (question, offset) {
+        var index = GUIDE_CURSOR + offset;
+        var card = makeElement("div", "question-card");
+        card.appendChild(makeElement("p", "", question.text));
+        var answers = makeElement("div", "answer-row");
+        ["Yes", "No", "Not sure", "Let me explain"].forEach(function (answer) {
+          var button = makeButton(answer, "answer-btn" + (FOLLOWUP_ANSWERS[index] && FOLLOWUP_ANSWERS[index].answer === answer ? " selected" : ""), function () {
+            if (answer === "Let me explain") {
+              var explain = makeElement("div", "explain-box");
+              var input = document.createElement("input");
+              input.type = "text";
+              input.placeholder = "Add a short explanation";
+              input.setAttribute("aria-label", "Explanation for: " + question.text);
+              var save = makeButton("Add", "btn btn-outline", function () {
+                var value = input.value.trim();
+                if (value) {
+                  FOLLOWUP_ANSWERS[index] = { answer: answer, text: value, tags: question.tags };
+                  renderGuide();
+                  setStatus("guideStatus", "Added. Analyse again when ready.", "success");
+                }
+              });
+              explain.appendChild(input);
+              explain.appendChild(save);
+              card.appendChild(explain);
+              input.focus();
+            } else {
+              FOLLOWUP_ANSWERS[index] = { answer: answer, text: answer, tags: answer === "Yes" ? question.tags : [], negative: answer === "No" };
+              renderGuide();
+              setStatus("guideStatus", answer === "Yes" ? "Noted as a possible cue." : "Noted. A negative answer can help rule possibilities out.", "info");
+              if (document.getElementById("situationInput").value.trim()) analyse();
+            }
+          });
+          answers.appendChild(button);
+        });
+        card.appendChild(answers);
+        if (FOLLOWUP_ANSWERS[index] && FOLLOWUP_ANSWERS[index].text && FOLLOWUP_ANSWERS[index].answer === "Let me explain") {
+          card.appendChild(makeElement("div", "small", "Added: " + FOLLOWUP_ANSWERS[index].text));
+        }
+        wrap.appendChild(card);
+      });
+      var nav = makeElement("div", "button-row");
+      nav.appendChild(makeButton("More questions", "btn btn-link", function () {
+        GUIDE_CURSOR = (GUIDE_CURSOR + 3) % GUIDE_QUESTIONS.length;
+        renderGuide();
+      }));
+      if (FOLLOWUP_ANSWERS.some(Boolean)) {
+        nav.appendChild(makeButton("Clear answers", "btn btn-link", function () {
+          FOLLOWUP_ANSWERS = [];
+          GUIDE_CURSOR = 0;
+          renderGuide();
+          setStatus("guideStatus", "Follow-up answers cleared.", "info");
+        }));
+      }
+      wrap.appendChild(nav);
+    }
+
+    function followupText() {
+      return FOLLOWUP_ANSWERS.filter(Boolean).map(function (item) {
+        return item.answer === "Yes" || item.answer === "Let me explain" ? item.tags.concat(item.text).join(" ") : "";
+      }).join(" ");
+    }
+
+    function renderResults(results, originalText) {
+      var section = document.getElementById("resultsSection");
+      var list = document.getElementById("resultsList");
+      list.textContent = "";
+      section.classList.remove("hidden");
+      if (!results.length) {
+        var empty = makeElement("div", "empty-state");
+        empty.appendChild(makeElement("h3", "", "No strong match yet"));
+        empty.appendChild(makeElement("p", "", "The description is too broad for a responsible match. Add what you noticed first, what you believed, what you chose, or what happened afterward, then analyse again."));
+        empty.appendChild(makeButton("Open guided questions", "btn btn-teal", function () {
+          document.getElementById("guidePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        }));
+        list.appendChild(empty);
+        document.getElementById("resultsIntro").textContent = "The tool is asking for more information rather than forcing a label.";
+        return;
+      }
+
+      var strong = results[0].score >= 9;
+      document.getElementById("resultsIntro").textContent = strong
+        ? "The first result has several distinctive cues, but alternative explanations may still be relevant."
+        : "These are tentative possibilities. Use the guided questions to separate close alternatives.";
+
+      results.forEach(function (result, index) {
+        list.appendChild(createMatchCard(result, index + 1, false));
+      });
+      var note = makeElement("div", "muted-box");
+      note.textContent = "A single situation can involve more than one codex entry. Read the distinctions and decide what best describes the process, if any.";
+      list.appendChild(note);
+      document.getElementById("reflectionSection").classList.remove("hidden");
+    }
+
+    function analyse() {
+      var input = document.getElementById("situationInput");
+      var original = input.value.trim();
+      if (!original) {
+        setStatus("inputStatus", "Describe a specific moment first, or use a random example.", "warning");
+        input.focus();
+        return;
+      }
+      var combined = original + " " + followupText();
+      var results = analyseText(combined);
+      LAST_ANALYSIS = { text: original, results: results };
+      renderResults(results, original);
+      if (!results.length || results[0].score < 9) {
+        setStatus("inputStatus", "The match is tentative. Add detail or use the neutral follow-up questions.", "info");
+        document.getElementById("guidePanel").classList.remove("hidden");
+      } else {
+        setStatus("inputStatus", "Analysis complete. Compare the top possibilities rather than treating one as certain.", "success");
+      }
+      document.getElementById("resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function reflectionText() {
+      var lines = ["Cognitive Shortcut Detective — reflection", "", "Situation: " + LAST_ANALYSIS.text, ""];
+      document.querySelectorAll("[data-reflection]").forEach(function (field) {
+        var labels = {
+          cue: "Cue or trigger",
+          judgment: "Judgment replaced",
+          ignored: "Information ignored",
+          slower: "Slower process",
+          impact: "Helped, hurt, or both"
+        };
+        lines.push(labels[field.getAttribute("data-reflection")] + ": " + field.value.trim());
+      });
+      return lines.join("\n");
+    }
+
+    function resultText() {
+      var lines = ["Cognitive Shortcut Detective — possible matches", "", "Situation: " + LAST_ANALYSIS.text, ""];
+      LAST_ANALYSIS.results.forEach(function (result, index) {
+        lines.push((index + 1) + ". " + result.entry.name + " — " + confidence(result.score).label);
+        lines.push("Category: " + result.entry.category);
+        lines.push("Subcategory: " + result.entry.subcategory);
+        lines.push("Why it may fit: " + (result.evidence.length ? result.evidence.join("; ") : "Needs more information."));
+        lines.push("Source: " + result.entry.sourceUrl);
+        lines.push("");
+      });
+      return lines.join("\n");
+    }
+
+    function copyText(text, statusId) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          setStatus(statusId, "Copied to the clipboard.", "success");
+        }).catch(function () {
+          fallbackCopy(text, statusId);
+        });
+      } else {
+        fallbackCopy(text, statusId);
+      }
+    }
+
+    function fallbackCopy(text, statusId) {
+      var temp = document.createElement("textarea");
+      temp.value = text;
+      temp.style.position = "fixed";
+      temp.style.opacity = "0";
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand("copy");
+        setStatus(statusId, "Copied to the clipboard.", "success");
+      } catch (error) {
+        setStatus(statusId, "Copy was not available in this browser. Select the text manually.", "warning");
+      }
+      document.body.removeChild(temp);
+    }
+
+    function showEntryDetail(entry) {
+      var detail = document.getElementById("entryDetail");
+      detail.textContent = "";
+      detail.classList.remove("hidden");
+      detail.appendChild(createMatchCard(entry, 0, true));
+    }
+
+    function renderExplorer() {
+      var query = normalize(document.getElementById("codexSearch").value);
+      var category = document.getElementById("categoryFilter").value;
+      var filtered = ENTRIES.filter(function (entry) {
+        var searchable = normalize([
+          entry.name, entry.category, entry.subcategory,
+          entry.shortDefinition, entry.shortcutPattern
+        ].concat(entry.signals || []).join(" "));
+        return (!category || entry.category === category) && (!query || searchable.indexOf(query) >= 0);
+      });
+      var list = document.getElementById("explorerList");
+      list.textContent = "";
+      document.getElementById("explorerCount").textContent = filtered.length + " of " + ENTRIES.length + " entries displayed";
+      CATEGORY_ORDER.forEach(function (cat) {
+        var catEntries = filtered.filter(function (entry) { return entry.category === cat; });
+        if (!catEntries.length) return;
+        var details = document.createElement("details");
+        details.className = "category-group " + CATEGORY_CLASS[cat].replace("tone-", "tone-group-");
+        details.open = true;
+        var summary = document.createElement("summary");
+        summary.textContent = cat + " (" + catEntries.length + ")";
+        details.appendChild(summary);
+
+        var subcategories = unique(catEntries.map(function (entry) { return entry.subcategory; }));
+        subcategories.forEach(function (subcat) {
+          var subDetails = document.createElement("details");
+          subDetails.className = "subcategory-group";
+          subDetails.open = true;
+          var subSummary = document.createElement("summary");
+          subSummary.textContent = subcat + " (" + catEntries.filter(function (e) { return e.subcategory === subcat; }).length + ")";
+          subDetails.appendChild(subSummary);
+          var entryList = makeElement("div", "entry-list");
+          catEntries.filter(function (e) { return e.subcategory === subcat; }).forEach(function (entry) {
+            entryList.appendChild(makeButton(entry.name, "entry-button", function () {
+              showEntryDetail(entry);
+              document.getElementById("entryDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+            }));
+          });
+          subDetails.appendChild(entryList);
+          details.appendChild(subDetails);
+        });
+        list.appendChild(details);
+      });
+    }
+
+    function browse() {
+      document.getElementById("explorerSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("codexSearch").focus();
+    }
+
+    function clearAll() {
+      document.getElementById("situationInput").value = "";
+      document.querySelectorAll("[data-reflection]").forEach(function (field) { field.value = ""; });
+      FOLLOWUP_ANSWERS = [];
+      GUIDE_CURSOR = 0;
+      LAST_ANALYSIS = { text: "", results: [] };
+      document.getElementById("resultsSection").classList.add("hidden");
+      document.getElementById("reflectionSection").classList.add("hidden");
+      document.getElementById("entryDetail").classList.add("hidden");
+      setStatus("inputStatus", "Ready for a new situation.", "info");
+      setStatus("guideStatus", "", "");
+      renderGuide();
+      document.getElementById("situationInput").focus();
+    }
+
+    function validateDataset() {
+      var counts = {};
+      var subcategories = {};
+      ENTRIES.forEach(function (entry) {
+        counts[entry.category] = (counts[entry.category] || 0) + 1;
+        subcategories[entry.subcategory] = (subcategories[entry.subcategory] || 0) + 1;
+      });
+      var expected = {
+        "Too Much Information": 42,
+        "Not Enough Meaning": 63,
+        "Need To Act Fast": 52,
+        "What Should We Remember?": 31
+      };
+      var ok = ENTRIES.length === 188 && CATEGORY_ORDER.every(function (cat) { return counts[cat] === expected[cat]; }) && Object.keys(subcategories).length === 20 && ENTRIES.every(function (entry) { return /^https:\/\/en\.wikipedia\.org\/wiki\//.test(entry.sourceUrl); });
+      if (!ok) {
+        setStatus("inputStatus", "Dataset validation failed. Please check the embedded codex source.", "error");
+      }
+      return ok;
+    }
+
+    SOURCE_ENTRIES.forEach(function (entry) {
+      if (!entry.name || !entry.sourceUrl) throw new Error("Invalid embedded codex entry");
+    });
+
+    CATEGORY_ORDER.forEach(function (category) {
+      var option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      document.getElementById("categoryFilter").appendChild(option);
+    });
+
+    document.querySelectorAll("[data-example]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.getElementById("situationInput").value = button.getAttribute("data-example");
+        setStatus("inputStatus", "Example loaded. Analyse it when ready.", "info");
+        document.getElementById("situationInput").focus();
+      });
+    });
+
+    document.getElementById("analyseBtn").addEventListener("click", analyse);
+    document.getElementById("unpackBtn").addEventListener("click", function () {
+      document.getElementById("guidePanel").classList.remove("hidden");
+      document.getElementById("guidePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+      setStatus("guideStatus", "Start with the questions that best describe your situation.", "info");
+    });
+    document.getElementById("randomBtn").addEventListener("click", function () {
+      var value = RANDOM_EXAMPLES[Math.floor(Math.random() * RANDOM_EXAMPLES.length)];
+      document.getElementById("situationInput").value = value;
+      setStatus("inputStatus", "Random example loaded. Analyse it when ready.", "info");
+      document.getElementById("situationInput").focus();
+    });
+    document.getElementById("clearBtn").addEventListener("click", clearAll);
+    document.getElementById("browseFromResultsBtn").addEventListener("click", browse);
+    document.getElementById("startAgainBtn").addEventListener("click", clearAll);
+    document.getElementById("copyReflectionBtn").addEventListener("click", function () { copyText(reflectionText(), "reflectionStatus"); });
+    document.getElementById("copyResultBtn").addEventListener("click", function () { copyText(resultText(), "reflectionStatus"); });
+    document.getElementById("codexSearch").addEventListener("input", renderExplorer);
+    document.getElementById("categoryFilter").addEventListener("change", renderExplorer);
+
+    renderGuide();
+    renderExplorer();
+    validateDataset();
+  }());
+  </script>
+</body>
+</html>
